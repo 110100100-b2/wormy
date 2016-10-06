@@ -65,6 +65,8 @@ def moveSnake(grid, direction, snakeCoords):
             snakeCoords.insert(0, {'x': snakeCoords[0]['x']+1, 'y':snakeCoords[0]['y']}) #Adding new head
             if (ateApple(grid, snakeCoords)):
                 pass
+            elif(ateSelf(grid, snakeCoords)):
+                pass
             else:    
                 updateGrid(snakeCoords[-1]['x'], snakeCoords[-1]['y'], grid)                
                 del snakeCoords[-1]            
@@ -75,6 +77,8 @@ def moveSnake(grid, direction, snakeCoords):
         if (snakeCoords[0]['x'] >= 1):            
             snakeCoords.insert(0, {'x': snakeCoords[0]['x']-1, 'y':snakeCoords[0]['y']}) #Adding new head
             if (ateApple(grid, snakeCoords)):
+                pass
+            elif(ateSelf(grid, snakeCoords)):
                 pass            
             else:
                 updateGrid(snakeCoords[-1]['x'], snakeCoords[-1]['y'], grid)
@@ -83,6 +87,8 @@ def moveSnake(grid, direction, snakeCoords):
         if (snakeCoords[0]['y'] >= 1):            
             snakeCoords.insert(0, {'x': snakeCoords[0]['x'], 'y':snakeCoords[0]['y']-1}) #Adding new head
             if (ateApple(grid, snakeCoords)):
+                pass
+            elif(ateSelf(grid, snakeCoords)):
                 pass            
             else:
                 updateGrid(snakeCoords[-1]['x'], snakeCoords[-1]['y'], grid)
@@ -92,7 +98,9 @@ def moveSnake(grid, direction, snakeCoords):
         if (snakeCoords[0]['y'] < 29):            
             snakeCoords.insert(0, {'x': snakeCoords[0]['x'], 'y':snakeCoords[0]['y']+1}) #Adding new head
             if (ateApple(grid, snakeCoords)):
-                pass 
+                pass
+            elif(ateSelf(grid, snakeCoords)):
+                pass            
             else:
                 updateGrid(snakeCoords[-1]['x'], snakeCoords[-1]['y'], grid)
                 del snakeCoords[-1] 
@@ -119,7 +127,7 @@ def drawGrid(grid):
             elif grid[row][column] == 2:
                 color = RED                   
             pygame.draw.rect(screen, color,
-                             [50+(MARGIN + WIDTH) * column + MARGIN,
+                             [(MARGIN + WIDTH) * column + MARGIN,
                               (MARGIN + HEIGHT) * row + MARGIN,
                               WIDTH,
                               HEIGHT]) 
@@ -139,12 +147,28 @@ def ateApple(grid, snakeCoords):
     if (snakeCoords[0]['x'] == apple[0] and snakeCoords[0]['y'] == apple[1]):
         grid[apple[1]][apple[0]] = 0
         score += 1
-        print('Hello WOrld')
+        print('Score is {}'.format(score))
         apple = createApple(grid)
         return True
     else:
         return False
-            
+
+def ateSelf(grid, snakeCoords):
+    global score
+    #score -= length of deleted parts
+    head = snakeCoords[0]
+    for i in range(1, len(snakeCoords)):
+        if (head == snakeCoords[i]): #Snake bit itself
+            remaining_snake = snakeCoords[:i]
+            bit_off_part = snakeCoords[i+1:]
+            score -= len(bit_off_part)
+            snakeCoords = remaining_snake
+            for j in range(len(bit_off_part)): #Zeroing out entries of bit_off_part
+                x = bit_off_part[j]['x']
+                y = bit_off_part[j]['y']
+                grid[y][x] = 0
+            return True  
+    return False      
         
    
 
