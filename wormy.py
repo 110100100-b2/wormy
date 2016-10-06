@@ -9,7 +9,7 @@ os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (x,y)
  
 # Define some colors
 BLACK = (0, 0, 0)
-GRAY = (61, 65, 71)
+GRAY = (25, 33, 36)
 WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
@@ -20,6 +20,7 @@ length = 0 #length of snake
 current_direction = 'right'
 score = 0
 game_state = 0
+difficulty = 1
  
 # This sets the WIDTH and HEIGHT of each grid location
 WIDTH = 20
@@ -56,11 +57,11 @@ snakeCoords = [{'x': startingPosition[0],     'y': startingPosition[0]}, #Head
 pygame.init()
  
 # Set the HEIGHT and WIDTH of the screen
-WINDOW_SIZE = [660, 660]
+WINDOW_SIZE = [900, 660]
 screen = pygame.display.set_mode(WINDOW_SIZE)
  
 # Set title of screen
-pygame.display.set_caption("Wormy")
+pygame.display.set_caption("Snakes")
  
 # Loop until the user clicks the close button.
 done = False
@@ -259,9 +260,10 @@ def reset():
     obstacles = createObstacles()
     apple = createApple(grid)
     score = 0
+    difficulty = 1
     startingPosition = randomStartingPosition()
     snakeCoords = [{'x': startingPosition[0],     'y': startingPosition[0]}, #Head
-               {'x': startingPosition[0]- 1,  'y': startingPosition[0]},
+                   {'x': startingPosition[0]- 1,  'y': startingPosition[0]},
                {'x': startingPosition[0]- 2,  'y': startingPosition[0]}] #Tail   
     
 
@@ -272,6 +274,29 @@ def hitObstacle(grid, snakeCoords):
         if (snakeCoords[0] == obstacles[i]):
             return True
     return False
+
+
+def drawBoard(screen):
+    global score
+    global difficulty
+    snakes_font = pygame.font.Font('./fonts/Mohave-Bold-Italics.ttf', 36)
+    score_font = pygame.font.Font('./fonts/Mohave-Bold-Italics.ttf', 24)
+    score_text = score_font.render('Score: {}'.format(score), 1, (255,255,255))
+    difficulty_font = pygame.font.Font('./fonts/Mohave-Bold-Italics.ttf', 20)
+    difficulty_text = difficulty_font.render('Difficulty: {}'.format(difficulty), 1, (255,255,255))
+    snakes = snakes_font.render("SNAKES", 1, (255,255,255)) 
+    info_font = pygame.font.SysFont("monospace", 10)
+    info_text_1 = info_font.render('Avoid hitting the blue obstacles',1, (255,255,255))
+    info_text_2 = info_font.render( 'Eat the apples to increase ',1,(255,255,255))
+    info_text_3 = info_font.render( 'your score',1,(255,255,255))
+    screen.blit(snakes, (720, 50))
+    screen.blit(info_text_1, (680, 240))
+    screen.blit(info_text_2, (680, 290))
+    screen.blit(info_text_3, (680, 310))
+    screen.blit(difficulty_text, (700, 500))
+    screen.blit(score_text, (700, 550)) 
+    
+    
     
  
 # Used to manage how fast the screen updates
@@ -301,7 +326,7 @@ while not done:
                 game_state = 0
     
     
- 
+    difficulty = (score // 3) + 1
     # Set the screen background
     screen.fill(GRAY)    
     
@@ -314,11 +339,15 @@ while not done:
     moveSnake(grid, current_direction, snakeCoords, screen)
     drawSnake(snakeCoords, grid)    
     
+    #Drawing Board
+    drawBoard(screen)
+    
+    #Displaying Game Over Screen
     if(game_state == 1):
             gameOver(screen)    
  
     # Limit to 15 frames per second
-    clock.tick(8)
+    clock.tick(8 + difficulty)
  
     # Go ahead and update the screen with what we've drawn.
     pygame.display.flip()
