@@ -212,7 +212,7 @@ def reset():
         for j in range(30):
             grid[i][j] = 0
     apple = createApple(grid)
-    
+    score = 0
     startingPosition = randomStartingPosition()
     snakeCoords = [{'x': startingPosition[0],     'y': startingPosition[0]}, #Head
                {'x': startingPosition[0]- 1,  'y': startingPosition[0]},
@@ -245,7 +245,7 @@ while not done:
                 pass
             if event.key == pygame.K_r and game_state == 1:
                 reset()
-                game_state == 0
+                game_state = 0
                 
  
     # Set the screen background
