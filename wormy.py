@@ -2,7 +2,7 @@ x = 200
 y = 50
 
 import pygame
-import random
+from random import randint
 
 import os
 os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (x,y)
@@ -61,27 +61,41 @@ def updateGrid(x,y, grid):
 
 def moveSnake(grid, direction, snakeCoords):
     if (direction == 'right'):
-        if (snakeCoords[0]['x'] < 29):            
+        if (snakeCoords[0]['x'] < 29):
             snakeCoords.insert(0, {'x': snakeCoords[0]['x']+1, 'y':snakeCoords[0]['y']}) #Adding new head
-            updateGrid(snakeCoords[-1]['x'], snakeCoords[-1]['y'], grid)
-            del snakeCoords[-1]
+            if (ateApple(grid, snakeCoords)):
+                pass
+            else:    
+                updateGrid(snakeCoords[-1]['x'], snakeCoords[-1]['y'], grid)                
+                del snakeCoords[-1]            
+            
+            
             
     elif(direction == 'left'):
         if (snakeCoords[0]['x'] >= 1):            
             snakeCoords.insert(0, {'x': snakeCoords[0]['x']-1, 'y':snakeCoords[0]['y']}) #Adding new head
-            updateGrid(snakeCoords[-1]['x'], snakeCoords[-1]['y'], grid)
-            del snakeCoords[-1] 
+            if (ateApple(grid, snakeCoords)):
+                pass            
+            else:
+                updateGrid(snakeCoords[-1]['x'], snakeCoords[-1]['y'], grid)
+                del snakeCoords[-1] 
     elif(direction == 'up'):
         if (snakeCoords[0]['y'] >= 1):            
             snakeCoords.insert(0, {'x': snakeCoords[0]['x'], 'y':snakeCoords[0]['y']-1}) #Adding new head
-            updateGrid(snakeCoords[-1]['x'], snakeCoords[-1]['y'], grid)
-            del snakeCoords[-1]
+            if (ateApple(grid, snakeCoords)):
+                pass            
+            else:
+                updateGrid(snakeCoords[-1]['x'], snakeCoords[-1]['y'], grid)
+                del snakeCoords[-1]
 
     elif(direction == 'down'):
         if (snakeCoords[0]['y'] < 29):            
             snakeCoords.insert(0, {'x': snakeCoords[0]['x'], 'y':snakeCoords[0]['y']+1}) #Adding new head
-            updateGrid(snakeCoords[-1]['x'], snakeCoords[-1]['y'], grid)
-            del snakeCoords[-1] 
+            if (ateApple(grid, snakeCoords)):
+                pass 
+            else:
+                updateGrid(snakeCoords[-1]['x'], snakeCoords[-1]['y'], grid)
+                del snakeCoords[-1] 
 
 
 def drawSnake(snakeCoords, grid):
@@ -93,6 +107,7 @@ def drawSnake(snakeCoords, grid):
         
 def drawGrid(grid):
     global BLACK
+    global RED
     global MARGIN
     global WIDTH
     global HEIGHT
@@ -101,11 +116,38 @@ def drawGrid(grid):
             color = BLACK
             if grid[row][column] == 1:
                 color = GREEN
+            elif grid[row][column] == 2:
+                color = RED                   
             pygame.draw.rect(screen, color,
-                             [(MARGIN + WIDTH) * column + MARGIN,
+                             [50+(MARGIN + WIDTH) * column + MARGIN,
                               (MARGIN + HEIGHT) * row + MARGIN,
                               WIDTH,
-                              HEIGHT])    
+                              HEIGHT]) 
+
+def createApple(grid):
+    rand_x = randint(0,29)
+    rand_y = randint(0,29)
+    grid[rand_y][rand_x] = 2
+    return [rand_x, rand_y]
+
+apple = createApple(grid)
+            
+def ateApple(grid, snakeCoords):
+    global apple
+    global score
+    global current_direction
+    if (snakeCoords[0]['x'] == apple[0] and snakeCoords[0]['y'] == apple[1]):
+        grid[apple[1]][apple[0]] = 0
+        score += 1
+        print('Hello WOrld')
+        apple = createApple(grid)
+        return True
+    else:
+        return False
+            
+        
+   
+
  
 # Used to manage how fast the screen updates
 clock = pygame.time.Clock()
