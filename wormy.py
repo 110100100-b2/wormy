@@ -18,6 +18,7 @@ RED = (255, 0, 0)
 length = 0 #length of snake
 current_direction = 'right'
 score = 0
+game_state = 0
  
 # This sets the WIDTH and HEIGHT of each grid location
 WIDTH = 20
@@ -38,10 +39,17 @@ for row in range(30):
  
 # Set row 1, cell 5 to one. (Remember rows and
 # column numbers start at zero.)
+
+
+def randomStartingPosition():
+    return [randint(2,29), randint(0, 29)]
+
 #grid[y][x] = (x, y)
-snakeCoords = [{'x': 15,     'y': 15}, #Head
-               {'x': 15 - 1, 'y': 15},
-               {'x': 15 - 2, 'y': 15}] #Tail
+
+startingPosition = randomStartingPosition()
+snakeCoords = [{'x': startingPosition[0],     'y': startingPosition[0]}, #Head
+               {'x': startingPosition[0]- 1,  'y': startingPosition[0]},
+               {'x': startingPosition[0]- 2,  'y': startingPosition[0]}] #Tail
 
 # Initialize pygame
 pygame.init()
@@ -59,7 +67,9 @@ done = False
 def updateGrid(x,y, grid):
     grid[y][x] = 0
 
-def moveSnake(grid, direction, snakeCoords):
+
+def moveSnake(grid, direction, snakeCoords, screen):
+    global game_state
     if (direction == 'right'):
         if (snakeCoords[0]['x'] < 29):
             snakeCoords.insert(0, {'x': snakeCoords[0]['x']+1, 'y':snakeCoords[0]['y']}) #Adding new head
@@ -70,6 +80,9 @@ def moveSnake(grid, direction, snakeCoords):
             else:    
                 updateGrid(snakeCoords[-1]['x'], snakeCoords[-1]['y'], grid)                
                 del snakeCoords[-1]            
+        else:
+            gameOver(screen)
+            game_state = 1
             
             
             
@@ -82,7 +95,10 @@ def moveSnake(grid, direction, snakeCoords):
                 pass            
             else:
                 updateGrid(snakeCoords[-1]['x'], snakeCoords[-1]['y'], grid)
-                del snakeCoords[-1] 
+                del snakeCoords[-1]
+        else:
+            gameOver(screen)
+            game_state = 1
     elif(direction == 'up'):
         if (snakeCoords[0]['y'] >= 1):            
             snakeCoords.insert(0, {'x': snakeCoords[0]['x'], 'y':snakeCoords[0]['y']-1}) #Adding new head
@@ -93,6 +109,9 @@ def moveSnake(grid, direction, snakeCoords):
             else:
                 updateGrid(snakeCoords[-1]['x'], snakeCoords[-1]['y'], grid)
                 del snakeCoords[-1]
+        else:
+            gameOver(screen)
+            game_state = 1
 
     elif(direction == 'down'):
         if (snakeCoords[0]['y'] < 29):            
@@ -104,13 +123,27 @@ def moveSnake(grid, direction, snakeCoords):
             else:
                 updateGrid(snakeCoords[-1]['x'], snakeCoords[-1]['y'], grid)
                 del snakeCoords[-1] 
-
+        else:
+            gameOver(screen)
+            game_state = 1
 
 def drawSnake(snakeCoords, grid):
     for i in range(len(snakeCoords)):
         x = snakeCoords[i]['x']
         y = snakeCoords[i]['y']
         grid[y][x] = 1
+        
+
+
+def gameOver(screen):
+    h1 = pygame.font.SysFont("monospace", 36)
+    h3 = pygame.font.SysFont("monospace", 15)
+    # render text
+    game_over = h1.render("Game Over!", 1, (255,255,0))
+    play_again = h3.render("Press 'r' to play again.", 1, (255,255,0))
+    screen.blit(game_over, (240, 100))
+    screen.blit(play_again, (240, 500)) 
+
         
         
 def drawGrid(grid):
@@ -170,7 +203,22 @@ def ateSelf(grid, snakeCoords):
             return True  
     return False      
         
-   
+def reset():
+    global score
+    global grid
+    global apple
+    global snakeCoords
+    for i in range(30):
+        for j in range(30):
+            grid[i][j] = 0
+    apple = createApple(grid)
+    
+    startingPosition = randomStartingPosition()
+    snakeCoords = [{'x': startingPosition[0],     'y': startingPosition[0]}, #Head
+               {'x': startingPosition[0]- 1,  'y': startingPosition[0]},
+               {'x': startingPosition[0]- 2,  'y': startingPosition[0]}] #Tail   
+    
+     
 
  
 # Used to manage how fast the screen updates
@@ -183,28 +231,34 @@ while not done:
             done = True  # Flag that we are done so we exit this loop
         
         elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_UP and current_direction != 'down':
+            if event.key == pygame.K_UP and current_direction != 'down' and game_state == 0:
                 current_direction = 'up'
                 pass
-            elif event.key == pygame.K_DOWN and current_direction != 'up':
+            elif event.key == pygame.K_DOWN and current_direction != 'up' and game_state == 0:
                 current_direction = 'down'
                 pass
-            elif event.key == pygame.K_LEFT and current_direction != 'right':
+            elif event.key == pygame.K_LEFT and current_direction != 'right' and game_state == 0:
                 current_direction = 'left'
                 pass
-            elif event.key == pygame.K_RIGHT and current_direction != 'left':
+            elif event.key == pygame.K_RIGHT and current_direction != 'left' and game_state == 0:
                 current_direction = 'right'
                 pass
+            if event.key == pygame.K_r and game_state == 1:
+                reset()
+                game_state == 0
+                
  
     # Set the screen background
     screen.fill(GRAY)    
     
-    #Move and draw the snake
-    moveSnake(grid, current_direction, snakeCoords)
-    drawSnake(snakeCoords, grid)
+    
  
     # Draw the grid
     drawGrid(grid)
+    
+    #Move and draw the snake
+    moveSnake(grid, current_direction, snakeCoords, screen)
+    drawSnake(snakeCoords, grid)    
  
     # Limit to 15 frames per second
     clock.tick(15)
